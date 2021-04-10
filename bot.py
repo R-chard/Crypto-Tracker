@@ -1,7 +1,7 @@
 import requests
 import telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler
-from tracker import get_prices
+from tracker import get_prices, get_top_coins
 
 telegram_bot_token = "1710250957:AAHpexQYf2Sp3aFOoeXmuQbEe0opwA9F9Dw"
 
@@ -34,6 +34,21 @@ def photo(update, context):
     print("test")
     context.bot.send_photo(chat_id, url) # sends a photo according to url
 
+# returns top X coins by market cap
+def top(update,context):
+    chat_id = update.effective_chat.id
+
+    try:
+        coins = get_top_coins(10)
+        message = ""
+        for coin in coins:
+            message +=  f"Name: {coin['name']}\nTicker: {coin['token']}\nCurrent Price: {coin['price']}\nMarket Cap: {coin['market_cap']}\nVolume Traded Today: {coin['volume_day']}\nOpening Price: {coin['day_open']}\nDay High: {coin['day_high']}\nDay Low: {coin['day_low']}\n\n"
+
+        context.bot.send_message(chat_id=chat_id,text=message)
+    except Exception as e:
+        print(e)
+        context.bot.send_message(chat_id=chat_id,text="Error")
+    
 
 def start(update, context):
     chat_id = update.effective_chat.id
@@ -42,5 +57,6 @@ def start(update, context):
 
 dispatcher.add_handler(CommandHandler("start", start)) # links /start with the start function
 dispatcher.add_handler(CommandHandler("get", get)) # links /get with the get function
+dispatcher.add_handler(CommandHandler("top", top))
 dispatcher.add_handler(CommandHandler("photo", photo))
 updater.start_polling()
