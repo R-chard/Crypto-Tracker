@@ -1,5 +1,5 @@
 import requests
-
+API_KEY = "e0e92287f03538a81333536881f29373f6313f8fae8093c1526eb53703828f51"
 
 def get_prices():
     coins = ["BTC", "ETH", "XRP", "LTC", "BCH", "ADA", "DOT", "LINK", "BNB", "XLM"]
