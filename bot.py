@@ -27,6 +27,13 @@ def get(update, context):
 
         context.bot.send_message(chat_id=chat_id, text="Coin not found")
 
+def photo(update, context):
+    chat_id = update.effective_chat.id
+    text = update.message.text
+    url = text.split()[1]
+    print("test")
+    context.bot.send_photo(chat_id, url) # sends a photo according to url
+
 
 def start(update, context):
     chat_id = update.effective_chat.id
@@ -35,4 +42,5 @@ def start(update, context):
 
 dispatcher.add_handler(CommandHandler("start", start)) # links /start with the start function
 dispatcher.add_handler(CommandHandler("get", get)) # links /get with the get function
+dispatcher.add_handler(CommandHandler("photo", photo))
 updater.start_polling()
