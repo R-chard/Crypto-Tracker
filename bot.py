@@ -18,19 +18,7 @@ def get(update, context):
     text = update.message.text
     coin = text.split()[1] # gets type of coin
     try:
-        crypto_data = get_prices(coin)
-        ticker = crypto_data["ticker"]
-        price = crypto_data["price"]
-        change_day = crypto_data["change_day"]
-        change_hour = crypto_data["change_hour"]
-        market_cap = crypto_data["market_cap"]
-        volume_day= crypto_data["volume_day"]
-        day_open = crypto_data["day_open"]
-        day_high= crypto_data["day_high"]
-        day_low= crypto_data["day_low"]
-
-        # message = f"Ticker: {ticker}\nCuurent Price: {price}\nHour Change: {change_hour}\nDay Change: {change_day:}\nMarket Cap: {market_cap}\nVolume Traded Today: {volume_day}\nDay Opening Price: {day_open}\nDay High: {day_high}\nDay Low: {day_low}\n\n"
-        message = f"Ticker: {ticker}"
+        message = f"Ticker: {coin}"
         keyboard = [
             [
                 InlineKeyboardButton("Price", callback_data="price"),
@@ -58,7 +46,7 @@ def get(update, context):
 
     except: # request had an error
 
-        context.bot.send_message(chat_id=chat_id, text="The specified coin was not found in our API. Please check that you have the correct Ticker Symbol")
+        context.bot.send_message(chat_id=chat_id, text="The specified coin was not found in our API. Please check that you have the correct ticker symbol")
 
 def graph(update, context):
     try:
@@ -68,8 +56,7 @@ def graph(update, context):
         interval = text[1]
         path = get_graph_info(interval,coin)
         context.bot.send_photo(chat_id, photo=open(path, 'rb')) # sends a photo according to path
-    except Exception as e:
-        print(e)
+    except Exception:
         context.bot.send_message(chat_id=chat_id, text="Error while generating graph")
 
 # returns top X coins by market cap
@@ -91,7 +78,7 @@ def thread_poller(chat_id,context,alert):
     # Time in seconds to delay thread
     DELAY = 60
     count = 0
-    # Alert expires after 16hrs
+    # Alert expires after 16hrs to prevent too many threads from being spawned
     while count<1000:
         
         coin,isAbove,threshold_price = alert
@@ -131,7 +118,7 @@ def alert(update,context):
 def help(update, context):
     chat_id = update.effective_chat.id
     text = update.message.text
-    message = f'Hello. Thanks for using the CryptoAlert Bot 🤖 \n\nCommands available:\n/get <coin> -- Retrieve pricing data 💰 for a specific coin\n<coin> -- Ticker symbol of a coin\n\n/top -- Retrieve data for the largest 10 🎖 cyptocurrencies by market cap.\n\n/graph <interval> <coin> -- Plots a line graph 📈 of closing price for a particular coin over 10 counts of the specified interval \n<interval> -- Either "day", "hour" or "minute"\n<coin> -- Ticker symbol of a coin\n\n/alert <coin> <direction> <threshold> -- Sets an alert ⏰ that triggers when the price of the coin crosses the specified threshold \n<coin> -- Ticker symbol of a coin\n<direction> -- Either "above" or "below"\n<threshold> -- Price to cross'
+    message = f'Hello. Thanks for using the CryptoAlert Bot 🤖 \n\nCommands available:\n/get <coin> -- Retrieve pricing data 💰 for a specific coin\n<coin> -- Ticker symbol of a coin\n\n/top -- Retrieve data for the largest 10 🎖 cyptocurrencies by market cap.\n\n/graph <coin> -- Plots a line graph 📈 of closing price for a particular coin over 10 counts of the selected interval \n<interval> -- Either "day", "hour" or "minute"\n<coin> -- Ticker symbol of a coin\n\n/alert <coin> <direction> <threshold> -- Sets an alert ⏰ that triggers when the price of the coin crosses the specified threshold \n<coin> -- Ticker symbol of a coin\n<direction> -- Either "above" or "below"\n<threshold> -- Price to cross'
     update.message.reply_text(message)
 
 
@@ -141,38 +128,30 @@ def button_click(update, context):
     
     coin = text.split()[1]
     crypto_data = get_prices(coin)
-    price = crypto_data["price"]
-    change_day = crypto_data["change_day"]
-    change_hour = crypto_data["change_hour"]
-    market_cap = crypto_data["market_cap"]
-    volume_day= crypto_data["volume_day"]
-    day_open = crypto_data["day_open"]
-    day_high= crypto_data["day_high"]
-    day_low= crypto_data["day_low"]
 
     if query.data == "price":
-        message = f"Price is: {price}"
+        message = f"Price is: {crypto_data['price']}"
         context.bot.send_message(chat_id=chat_id, text=message)
-    if query.data == "hourChange":
-        message = f"Hourly Change is: {change_hour}"
+    elif query.data == "hourChange":
+        message = f"Hourly Change is: {crypto_data['change_hour']}"
         context.bot.send_message(chat_id=chat_id, text=message)
-    if query.data == "dayChange":
-        message = f"Daily Change is: {change_day}"
+    elif query.data == "dayChange":
+        message = f"Daily Change is: {crypto_data['change_day']}"
         context.bot.send_message(chat_id=chat_id, text=message)
-    if query.data == "marketCap":
-        message = f"Market Cap is: {market_cap}"
+    elif query.data == "marketCap":
+        message = f"Market Cap is: {crypto_data['market_cap']}"
         context.bot.send_message(chat_id=chat_id, text=message)
-    if query.data == "volumeTraded":
-        message = f"Volume Traded Today is: {volume_day}"
+    elif query.data == "volumeTraded":
+        message = f"Volume Traded Today is: {crypto_data['volume_day']}"
         context.bot.send_message(chat_id=chat_id, text=message)
-    if query.data == "dayOpening":
-        message = f"Day Opening Price is: {day_open}"
+    elif query.data == "dayOpening":
+        message = f"Day Opening Price is: {crypto_data['day_open']}"
         context.bot.send_message(chat_id=chat_id, text=message)
-    if query.data == "dayHigh":
-        message = f"Day High: {day_high}"
+    elif query.data == "dayHigh":
+        message = f"Day High: {crypto_data['day_high']}"
         context.bot.send_message(chat_id=chat_id, text=message)
-    if query.data == "dayLow":
-        message = f"Day Low: {day_low}"
+    elif query.data == "dayLow":
+        message = f"Day Low: {crypto_data['day_low']}"
         context.bot.send_message(chat_id=chat_id, text=message)
 
 
