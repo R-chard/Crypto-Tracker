@@ -23,9 +23,9 @@ def get_prices(coin):
 
     return data
 
-def get_graph_info(coin):
+def get_graph_info(rate,coin):
     crypto_data = requests.get(
-        "https://min-api.cryptocompare.com/data/v2/histohour?fsym={}&tsym=USD&limit=10&api_key=e0e92287f03538a81333536881f29373f6313f8fae8093c1526eb53703828f51".format(coin)).json()
+        "https://min-api.cryptocompare.com/data/v2/histo{}?fsym={}&tsym=USD&limit=10".format(rate,coin)).json()
     data = {}
     times = []
     price = []
@@ -40,16 +40,21 @@ def get_graph_info(coin):
     fig, ax = plt.subplots(figsize=(8, 7))
     plt.xticks(rotation=30)
 
-    plt.title('Last 10 day close prices for {}'.format(coin))
+    plt.title('{} Close prices for the last 10 {}s'.format(coin,rate))
     plt.xlabel('Time')
-    plt.ylabel('Hourly Close Price')
+    if rate == "hour":
+        label = "Hourly"
+    elif rate == "day":
+        label = "Daily"
+    elif rate == "minute":
+        label = "Minute"
+    plt.ylabel('{} Close Prices'.format(label))
     
     plt.plot_date(times, price)
     plt.plot(times,price)
 
-    date_form = DateFormatter("%d-%m %H")
+    date_form = DateFormatter("%d-%m %H:%M")
     ax.xaxis.set_major_formatter(date_form)
-    plt.show()
     path = "graphs/{}.png".format(coin)
     plt.savefig(path)
     
@@ -73,5 +78,3 @@ def get_top_coins(count):
 
     return coins
 
-if __name__ == "__main__":
-    get_graph_info("BTC")
