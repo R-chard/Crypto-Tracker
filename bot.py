@@ -61,13 +61,23 @@ def get(update, context):
         context.bot.send_message(chat_id=chat_id, text="Coin not found")
 
 def graph(update, context):
+    global text
+    text = update.message.text
     try:
         chat_id = update.effective_chat.id
-        text = update.message.text.split()
-        coin = text[2]
-        interval = text[1]
-        path = get_graph_info(interval,coin)
-        context.bot.send_photo(chat_id, photo=open(path, 'rb')) # sends a photo according to path
+        text = update.message.text
+        coin = text.split()[1] # gets type of coin
+        keyboard = [
+            [
+                InlineKeyboardButton("Minute", callback_data="min"),
+                InlineKeyboardButton("Hour", callback_data="hour"),
+                InlineKeyboardButton("Day", callback_data="day"),
+            ]
+        ]
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        update.message.reply_text('Please choose the interval:', reply_markup=reply_markup)
+
     except Exception as e:
         print(e)
         context.bot.send_message(chat_id=chat_id, text="Error while generating graph")
@@ -170,6 +180,16 @@ def button_click(update, context):
     if query.data == "dayLow":
         message = f"Day Low: {day_low}"
         context.bot.send_message(chat_id=chat_id, text=message)
+
+    if query.data == "min":
+        path = get_graph_info("minute",coin)
+        context.bot.send_photo(chat_id, photo=open(path, 'rb')) # sends a photo according to path
+    if query.data == "hour":
+        path = get_graph_info("hour",coin)
+        context.bot.send_photo(chat_id, photo=open(path, 'rb')) # sends a photo according to path
+    if query.data == "day":
+        path = get_graph_info("day",coin)
+        context.bot.send_photo(chat_id, photo=open(path, 'rb')) # sends a photo according to path
 
 
 dispatcher.add_handler(CommandHandler("help", help)) # links /start with the start function
