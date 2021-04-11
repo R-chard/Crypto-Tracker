@@ -8,12 +8,17 @@ API_KEY = "e0e92287f03538a81333536881f29373f6313f8fae8093c1526eb53703828f51"
 
 def get_prices(coin):
     crypto_data = requests.get(
-        "https://min-api.cryptocompare.com/data/pricemultifull?fsyms={}&tsyms=USD".format(coin)).json()["RAW"]
+        "https://min-api.cryptocompare.com/data/pricemultifull?fsyms={}&tsyms=USD".format(coin)).json()["DISPLAY"][coin]["USD"]
     data = {
-        "coin": coin,
-        "price": crypto_data[coin]["USD"]["PRICE"],
-        "change_day": crypto_data[coin]["USD"]["CHANGEPCT24HOUR"],
-        "change_hour": crypto_data[coin]["USD"]["CHANGEPCTHOUR"]
+        "ticker": coin,
+        "price": crypto_data["PRICE"],
+        "change_day": crypto_data["CHANGEDAY"],
+        "change_hour": crypto_data["CHANGEHOUR"],
+        "market_cap": crypto_data["MKTCAP"],
+        "volume_day": crypto_data["VOLUMEDAYTO"],
+        "day_open": crypto_data["OPENDAY"],
+        "day_high": crypto_data["HIGHDAY"],
+        "day_low": crypto_data["LOWDAY"]
     }
 
     return data
@@ -55,7 +60,7 @@ def get_top_coins(count):
     coins = [{} for i in range(int(count))]
     for i in range(len(crypto_coins)):
         data = {
-            "token": crypto_coins[i]["CoinInfo"]["Name"],
+            "ticker": crypto_coins[i]["CoinInfo"]["Name"],
             "name": crypto_coins[i]["CoinInfo"]["FullName"],
             "price": crypto_coins[i]["DISPLAY"]["USD"]["PRICE"],
             "market_cap": crypto_coins[i]["DISPLAY"]["USD"]["MKTCAP"],

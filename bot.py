@@ -11,15 +11,20 @@ dispatcher = updater.dispatcher
 def get(update, context):
     chat_id = update.effective_chat.id
     text = update.message.text
-    print("got text message:", text)
     coin = text.split()[1] # gets type of coin
     try:
         crypto_data = get_prices(coin)
-        coin = crypto_data["coin"]
+        ticker = crypto_data["ticker"]
         price = crypto_data["price"]
         change_day = crypto_data["change_day"]
         change_hour = crypto_data["change_hour"]
-        message = f"Coin: {coin}\nPrice: ${price:,.2f}\nHour Change: {change_hour:.3f}%\nDay Change: {change_day:.3f}%\n\n"
+        market_cap = crypto_data["market_cap"]
+        volume_day= crypto_data["volume_day"]
+        day_open = crypto_data["day_open"]
+        day_high= crypto_data["day_high"]
+        day_low= crypto_data["day_low"]
+
+        message = f"Ticker: {ticker}\nPrice: {price}\nHour Change: {change_hour}\nDay Change: {change_day:}\nMarket Cap: {market_cap}\nVolume Traded Today:{volume_day}\nOpening Price: {day_open}\nDay High: {day_high}\nDay Low: {day_low}\n\n"
 
         context.bot.send_message(chat_id=chat_id, text=message)
 
@@ -42,13 +47,12 @@ def top(update,context):
         coins = get_top_coins(10)
         message = ""
         for coin in coins:
-            message +=  f"Name: {coin['name']}\nTicker: {coin['token']}\nCurrent Price: {coin['price']}\nMarket Cap: {coin['market_cap']}\nVolume Traded Today: {coin['volume_day']}\nOpening Price: {coin['day_open']}\nDay High: {coin['day_high']}\nDay Low: {coin['day_low']}\n\n"
+            message +=  f"Name: {coin['name']}\nTicker Symbol: {coin['ticker']}\nCurrent Price: {coin['price']}\nMarket Cap: {coin['market_cap']}\nVolume Traded Today: {coin['volume_day']}\nOpening Price: {coin['day_open']}\nDay High: {coin['day_high']}\nDay Low: {coin['day_low']}\n\n"
 
         context.bot.send_message(chat_id=chat_id,text=message)
     except Exception as e:
-        print(e)
         context.bot.send_message(chat_id=chat_id,text="Error")
-    
+
 
 def start(update, context):
     chat_id = update.effective_chat.id
