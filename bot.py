@@ -2,16 +2,18 @@ import requests
 import telegram
 import _thread as thread
 import time
-from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, CallbackContext
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import *
+from telegram import *
 from tracker import get_prices, get_top_coins,get_graph_info
 
 telegram_bot_token = "1710250957:AAHpexQYf2Sp3aFOoeXmuQbEe0opwA9F9Dw"
-
+bot = Bot(telegram_bot_token)
 updater = Updater(token=telegram_bot_token, use_context=True)
 dispatcher = updater.dispatcher
+text = ""
 
 def get(update, context):
+    global text
     chat_id = update.effective_chat.id
     text = update.message.text
     coin = text.split()[1] # gets type of coin
@@ -27,9 +29,32 @@ def get(update, context):
         day_high= crypto_data["day_high"]
         day_low= crypto_data["day_low"]
 
-        message = f"Ticker: {ticker}\nCuurent Price: {price}\nHour Change: {change_hour}\nDay Change: {change_day:}\nMarket Cap: {market_cap}\nVolume Traded Today: {volume_day}\nDay Opening Price: {day_open}\nDay High: {day_high}\nDay Low: {day_low}\n\n"
+        # message = f"Ticker: {ticker}\nCuurent Price: {price}\nHour Change: {change_hour}\nDay Change: {change_day:}\nMarket Cap: {market_cap}\nVolume Traded Today: {volume_day}\nDay Opening Price: {day_open}\nDay High: {day_high}\nDay Low: {day_low}\n\n"
+        message = f"Ticker: {ticker}"
+        keyboard = [
+            [
+                InlineKeyboardButton("Price", callback_data="price"),
+                InlineKeyboardButton("Hour Change", callback_data="hourChange"),
+            ],
+            [
+                InlineKeyboardButton("Day Change", callback_data="dayChange"),
+                InlineKeyboardButton("Market Cap", callback_data="marketCap"),
+            ],
+            [
+                InlineKeyboardButton("Volume Traded Today", callback_data="volumeTraded"),
+                InlineKeyboardButton("Day Opening Price", callback_data="dayOpening"),
+                
+            ],
+            [
+                InlineKeyboardButton("Day High", callback_data="dayHigh"),
+                InlineKeyboardButton("Day Low", callback_data="dayLow"),
+            ]
+        ]
 
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
         context.bot.send_message(chat_id=chat_id, text=message)
+        update.message.reply_text('Please choose the data you are interested in:', reply_markup=reply_markup)
 
     except: # request had an error
 
@@ -105,23 +130,46 @@ def help(update, context):
     message = f'Hello. Thanks for using the CryptoAlert Bot 🤖 \n\nCommands available:\n/get <coin> -- Retrieve pricing data 💰 for a specific coin\n<coin> -- Ticker symbol of a coin\n\n/top -- Retrieve data for the largest 10 🎖 cyptocurrencies by market cap.\n\n/graph <interval> <coin> -- Plots a line graph 📈 of closing price for a particular coin over 10 counts of the specified interval \n<interval> -- Either "day", "hour" or "minute"\n<coin> -- Ticker symbol of a coin\n\n/alert <coin> <direction> <threshold> -- Sets an alert ⏰ that triggers when the price of the coin crosses the specified threshold \n<coin> -- Ticker symbol of a coin\n<direction> -- Either "above" or "below"\n<threshold> -- Price to cross'
     update.message.reply_text(message)
 
-def showButton(update:Update, context:CallbackContext): 
-    keyboard = [
-        [
-            InlineKeyboardButton("price", callback_data="1"),
-            InlineKeyboardButton("data", callback_data="2"),
-        ]
-    ]
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Please choose:', reply_markup=reply_markup)
+def button_click(update, context):
+    query : CallbackQuery = update.callback_query
+    chat_id = update.effective_chat.id
+    
+    coin = text.split()[1]
+    crypto_data = get_prices(coin)
+    price = crypto_data["price"]
+    change_day = crypto_data["change_day"]
+    change_hour = crypto_data["change_hour"]
+    market_cap = crypto_data["market_cap"]
+    volume_day= crypto_data["volume_day"]
+    day_open = crypto_data["day_open"]
+    day_high= crypto_data["day_high"]
+    day_low= crypto_data["day_low"]
 
-def button_click(update:Update, context:CallbackContext):
-    query = update.callback_query
-    if query.data == "1":
-        update.message.reply_text("1")
-    if query.data == "2":
-        update.message.reply_text("2")
+    if query.data == "price":
+        message = f"Price is: {price}"
+        context.bot.send_message(chat_id=chat_id, text=message)
+    if query.data == "hourChange":
+        message = f"Hourly Change is: {change_hour}"
+        context.bot.send_message(chat_id=chat_id, text=message)
+    if query.data == "dayChange":
+        message = f"Daily Change is: {change_day}"
+        context.bot.send_message(chat_id=chat_id, text=message)
+    if query.data == "marketCap":
+        message = f"Market Cap is: {market_cap}"
+        context.bot.send_message(chat_id=chat_id, text=message)
+    if query.data == "volumeTraded":
+        message = f"Volume Traded Today is: {volume_day}"
+        context.bot.send_message(chat_id=chat_id, text=message)
+    if query.data == "dayOpening":
+        message = f"Day Opening Price is: {day_open}"
+        context.bot.send_message(chat_id=chat_id, text=message)
+    if query.data == "dayHigh":
+        message = f"Day High: {day_high}"
+        context.bot.send_message(chat_id=chat_id, text=message)
+    if query.data == "dayLow":
+        message = f"Day Low: {day_low}"
+        context.bot.send_message(chat_id=chat_id, text=message)
 
 
 dispatcher.add_handler(CommandHandler("help", help)) # links /start with the start function
