@@ -1,7 +1,6 @@
 # Crypto Tracker 🤖
 
-Crypto Tracker is a telegram bot that offers many features to enable users to better monitor cryptocurrencies. We were inspired to build this bot after noticing the lack of a similar program on Telegram, despite the prevalence of Bitcoin ownership or the popularity of Telegram as a messaging platform.
-
+Crypto Tracker is a telegram bot that offers many features to enable users to better monitor cryptocurrencies. We were inspired to build Crypto Tracker after noticing the lack of a similar program on Telegram, despite the prevalence of Bitcoin ownership or the popularity of Telegram as a messaging platform.
 ## Features ✨
 Our telegram bot allows the user to 
 

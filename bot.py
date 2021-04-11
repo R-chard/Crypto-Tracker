@@ -2,7 +2,8 @@ import requests
 import telegram
 import _thread as thread
 import time
-from telegram.ext import Updater, CommandHandler, MessageHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, CallbackContext
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from tracker import get_prices, get_top_coins,get_graph_info
 
 telegram_bot_token = "1710250957:AAHpexQYf2Sp3aFOoeXmuQbEe0opwA9F9Dw"
@@ -32,7 +33,7 @@ def get(update, context):
 
     except: # request had an error
 
-        context.bot.send_message(chat_id=chat_id, text="Coin not found")
+        context.bot.send_message(chat_id=chat_id, text="The specified coin was not found in our API. Please check that you have the correct Ticker Symbol")
 
 def graph(update, context):
     try:
@@ -58,13 +59,16 @@ def top(update,context):
 
         context.bot.send_message(chat_id=chat_id,text=message)
     except Exception as e:
-        context.bot.send_message(chat_id=chat_id,text="Error")
+        context.bot.send_message(chat_id=chat_id,text="Unknown error. Please try again later")
 
 # polling function to be ran on a seperate thread
 def thread_poller(chat_id,context,alert):
     # Time in seconds to delay thread
-    DELAY = 5
-    while True:
+    DELAY = 60
+    count = 0
+    # Alert expires after 16hrs
+    while count<1000:
+        
         coin,isAbove,threshold_price = alert
         data = get_prices(coin)
         currentPrice = float(data["price"][1:].replace(',','')) # First character is the dollar sign
@@ -78,6 +82,7 @@ def thread_poller(chat_id,context,alert):
             context.bot.send_message(chat_id=chat_id,text=message)
             break
 
+        count += 1
         time.sleep(DELAY)
 
 def alert(update,context):
@@ -104,9 +109,31 @@ def help(update, context):
     message = f'Hello. Thanks for using the CryptoAlert Bot 🤖 \n\nCommands available:\n/get <coin> -- Retrieve pricing data 💰 for a specific coin\n<coin> -- Ticker symbol of a coin\n\n/top -- Retrieve data for the largest 10 🎖 cyptocurrencies by market cap.\n\n/graph <interval> <coin> -- Plots a line graph 📈 of closing price for a particular coin over 10 counts of the specified interval \n<interval> -- Either "day", "hour" or "minute"\n<coin> -- Ticker symbol of a coin\n\n/alert <coin> <direction> <threshold> -- Sets an alert ⏰ that triggers when the price of the coin crosses the specified threshold \n<coin> -- Ticker symbol of a coin\n<direction> -- Either "above" or "below"\n<threshold> -- Price to cross'
     update.message.reply_text(message)
 
+def showButton(update:Update, context:CallbackContext): 
+    keyboard = [
+        [
+            InlineKeyboardButton("price", callback_data="1"),
+            InlineKeyboardButton("data", callback_data="2"),
+        ]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text('Please choose:', reply_markup=reply_markup)
+
+def button_click(update:Update, context:CallbackContext):
+    query = update.callback_query
+    if query.data == "1":
+        update.message.reply_text("1")
+    if query.data == "2":
+        update.message.reply_text("2")
+
+
 dispatcher.add_handler(CommandHandler("help", help)) # links /start with the start function
 dispatcher.add_handler(CommandHandler("get", get)) # links /get with the get function
 dispatcher.add_handler(CommandHandler("top", top))
 dispatcher.add_handler(CommandHandler("graph", graph))
 dispatcher.add_handler(CommandHandler("alert",alert))
+
+updater.dispatcher.add_handler(CallbackQueryHandler(button_click))
 updater.start_polling()
+updater.idle()
