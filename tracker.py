@@ -29,7 +29,7 @@ def get_graph_info(rate,coin):
     data = {}
     times = []
     price = []
-    for i in range(10):
+    for i in range(1, 11):
         t = (crypto_data['Data']['Data'][i]['time'])
         timestamp = datetime.datetime.fromtimestamp(t)
         times.append(timestamp)
