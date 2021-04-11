@@ -37,7 +37,7 @@ def get_graph_info(rate,coin):
 
     data['time'] = times
     data['price'] = price
-    fig, ax = plt.subplots(figsize=(8, 7))
+    fig, ax = plt.subplots(figsize=(8, 8))
     plt.xticks(rotation=30)
 
     plt.title('{} Close prices for the last 10 {}s'.format(coin,rate))
@@ -52,6 +52,8 @@ def get_graph_info(rate,coin):
     
     plt.plot_date(times, price)
     plt.plot(times,price)
+    ax = plt.gca()
+    ax.set_facecolor((0.84,0.84,0.84))
 
     date_form = DateFormatter("%d-%m %H:%M")
     ax.xaxis.set_major_formatter(date_form)
