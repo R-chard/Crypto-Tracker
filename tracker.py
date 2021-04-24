@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 import datetime
 
-API_KEY = "e0e92287f03538a81333536881f29373f6313f8fae8093c1526eb53703828f51"
-
 def get_prices(coin):
     crypto_data = requests.get(
         "https://min-api.cryptocompare.com/data/pricemultifull?fsyms={}&tsyms=USD".format(coin)).json()["DISPLAY"][coin]["USD"]

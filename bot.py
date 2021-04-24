@@ -11,6 +11,8 @@ bot = Bot(telegram_bot_token)
 updater = Updater(token=telegram_bot_token, use_context=True)
 dispatcher = updater.dispatcher
 text = ""
+MAX_ALERT_LIMIT = 1000
+alerts_count = 0
 
 def get(update, context):
     global text
@@ -88,9 +90,7 @@ def top(update,context):
 def thread_poller(chat_id,context,alert):
     # Time in seconds to delay thread
     DELAY = 60
-    count = 0
-    # Alert expires after 16hrs to prevent too many threads from being spawned
-    while count<1000:
+    while True:
         
         coin,isAbove,threshold_price = alert
         data = get_prices(coin)
@@ -99,13 +99,14 @@ def thread_poller(chat_id,context,alert):
             if currentPrice > threshold_price:
                 message = f"Price of {data['ticker']} is now at {data['price']} and above your threshold price of ${threshold_price}"
                 context.bot.send_message(chat_id=chat_id,text=message)
+                context.bot.send_message(chat_id=chat_id,text="Alert removed from the system")
                 break
         elif currentPrice < threshold_price:
             message = f"Price of {data['ticker']} is now at {data['price']} and below your threshold price of ${threshold_price}"
             context.bot.send_message(chat_id=chat_id,text=message)
+            context.bot.send_message(chat_id=chat_id,text="Alert removed from the system")
             break
 
-        count += 1
         time.sleep(DELAY)
 
 def alert(update,context):
@@ -122,7 +123,13 @@ def alert(update,context):
         threshold_price = float(text[3])
 
         alert=(text[1],isAbove,threshold_price)
-        thread.start_new_thread(thread_poller,(chat_id,context,alert))
+        if alerts_count + 1 < MAX_ALERT_LIMIT:
+            alerts_count += 1
+            context.bot.send_message(chat_id= chat_id, text= "Alert successfully set")
+            thread.start_new_thread(thread_poller,(chat_id,context,alert))
+        else:
+            context.bot.send_message(chat_id= chat_id, text= "There are too many alerts currently running on the system. Please try again later")
+        
     except Exception:
         context.bot.send_message(chat_id=chat_id,text="Invalid input format")
 
