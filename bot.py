@@ -1,11 +1,13 @@
 import requests
 import telegram
 import _thread as thread
+import os
 import time
 from telegram.ext import *
 from telegram import *
 from tracker import get_prices, get_top_coins,get_graph_info
 
+PORT = int(os.environ.get("PORT",80))
 telegram_bot_token = "1710250957:AAHpexQYf2Sp3aFOoeXmuQbEe0opwA9F9Dw"
 bot = Bot(telegram_bot_token)
 updater = Updater(token=telegram_bot_token, use_context=True)
@@ -192,5 +194,6 @@ dispatcher.add_handler(CommandHandler("graph", graph))
 dispatcher.add_handler(CommandHandler("alert",alert))
 
 updater.dispatcher.add_handler(CallbackQueryHandler(button_click))
-updater.start_polling()
+updater.start_webhook(listen="https://limitless-castle-02267.herokuapp.com/",port=int(PORT),url_path=telegram_bot_token)
+updater.bot.setWebhook()
 updater.idle()
