@@ -100,11 +100,13 @@ def thread_poller(chat_id,context,alert):
                 message = f"Price of {data['ticker']} is now at {data['price']} and above your threshold price of ${threshold_price}"
                 context.bot.send_message(chat_id=chat_id,text=message)
                 context.bot.send_message(chat_id=chat_id,text="Alert removed from the system")
+                alerts_count -= 1
                 break
         elif currentPrice < threshold_price:
             message = f"Price of {data['ticker']} is now at {data['price']} and below your threshold price of ${threshold_price}"
             context.bot.send_message(chat_id=chat_id,text=message)
             context.bot.send_message(chat_id=chat_id,text="Alert removed from the system")
+            alerts_count -= 1
             break
 
         time.sleep(DELAY)
