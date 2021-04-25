@@ -7,8 +7,10 @@ from telegram.ext import *
 from telegram import *
 from tracker import get_prices, get_top_coins,get_graph_info
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
+PORT = int(os.environ.get('PORT', 5000))
 
 bot = Bot(os.getenv('BOT_TOKEN'))
 updater = Updater(token=os.getenv('BOT_TOKEN'), use_context=True)
@@ -196,5 +198,6 @@ dispatcher.add_handler(CommandHandler("graph", graph))
 dispatcher.add_handler(CommandHandler("alert",alert))
 
 updater.dispatcher.add_handler(CallbackQueryHandler(button_click))
-updater.start_polling()
+updater.start_webhook(listen="0.0.0.0", port=int(PORT), url_path=os.getenv('BOT_TOKEN'))
+updater.bot.setWebhook('https://yourherokuappname.herokuapp.com/' + os.getenv('BOT_TOKEN'))
 updater.idle()
