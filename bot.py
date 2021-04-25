@@ -6,12 +6,12 @@ import time
 from telegram.ext import *
 from telegram import *
 from tracker import get_prices, get_top_coins,get_graph_info
-from dotenv import dotenv_values
-config = dotenv_values(".env")
+from dotenv import load_dotenv
 
-PORT = int(os.environ.get("PORT",80))
-bot = Bot(config.BOT_TOKEN)
-updater = Updater(token=config.BOT_TOKEN, use_context=True)
+load_dotenv()
+
+bot = Bot(os.getenv('BOT_TOKEN'))
+updater = Updater(token=os.getenv('BOT_TOKEN'), use_context=True)
 dispatcher = updater.dispatcher
 text = ""
 MAX_ALERT_LIMIT = 1000
@@ -196,6 +196,5 @@ dispatcher.add_handler(CommandHandler("graph", graph))
 dispatcher.add_handler(CommandHandler("alert",alert))
 
 updater.dispatcher.add_handler(CallbackQueryHandler(button_click))
-updater.start_webhook(listen=config.SERVER_IP,port=int(PORT),url_path=config.BOT_TOKEN)
-updater.bot.setWebhook()
+updater.start_polling()
 updater.idle()
