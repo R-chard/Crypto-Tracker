@@ -188,7 +188,8 @@ def button_click(update, context):
         context.bot.send_photo(chat_id, photo=open(path, 'rb')) # sends a photo according to path
 
 
-dispatcher.add_handler(CommandHandler("help", help)) # links /start with the start function
+dispatcher.add_handler(CommandHandler("help", help)) # links /help and /start with the help function
+dispatcher.add_handler(CommandHandler("start", help)) # links /help and /start with the help function
 dispatcher.add_handler(CommandHandler("get", get)) # links /get with the get function
 dispatcher.add_handler(CommandHandler("top", top))
 dispatcher.add_handler(CommandHandler("graph", graph))
