@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-PORT = int(os.environ.get('PORT', 5000))
+PORT = int(os.environ.get('PORT', 8443))
 
 bot = Bot(os.getenv('BOT_TOKEN'))
 updater = Updater(token=os.getenv('BOT_TOKEN'), use_context=True)
@@ -94,6 +94,7 @@ def top(update,context):
 # polling function to be ran on a seperate thread
 def thread_poller(chat_id,context,alert):
     # Time in seconds to delay thread
+    global alerts_count
     DELAY = 60
     while True:
         
@@ -110,13 +111,14 @@ def thread_poller(chat_id,context,alert):
         elif currentPrice < threshold_price:
             message = f"Price of {data['ticker']} is now at {data['price']} and below your threshold price of ${threshold_price}"
             context.bot.send_message(chat_id=chat_id,text=message)
-            context.bot.send_message(chat_id=chat_id,text="Alert removed from the system")
+            context.bot.send_message(chat_id=chat_id,text="Alert is now removed from the system")
             alerts_count -= 1
             break
 
         time.sleep(DELAY)
 
 def alert(update,context):
+    global alerts_count
     chat_id = update.effective_chat.id
     text = update.message.text.split()
     try:
@@ -135,9 +137,10 @@ def alert(update,context):
             context.bot.send_message(chat_id= chat_id, text= "Alert successfully set")
             thread.start_new_thread(thread_poller,(chat_id,context,alert))
         else:
-            context.bot.send_message(chat_id= chat_id, text= "There are too many alerts currently running on the system. Please try again later")
+            context.bot.send_message(chat_id= chat_id, text= "There are too many alerts currently running on our system. Please try again later")
         
-    except Exception:
+    except Exception as e:
+        print(e)
         context.bot.send_message(chat_id=chat_id,text="Invalid input format")
 
 def help(update, context):
@@ -198,6 +201,5 @@ dispatcher.add_handler(CommandHandler("graph", graph))
 dispatcher.add_handler(CommandHandler("alert",alert))
 
 updater.dispatcher.add_handler(CallbackQueryHandler(button_click))
-updater.start_webhook(listen="0.0.0.0", port=int(PORT), url_path=os.getenv('BOT_TOKEN'))
-updater.bot.setWebhook('https://yourherokuappname.herokuapp.com/' + os.getenv('BOT_TOKEN'))
+updater.start_polling()
 updater.idle()
